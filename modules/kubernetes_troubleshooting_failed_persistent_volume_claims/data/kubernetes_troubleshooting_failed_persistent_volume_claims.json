@@ -1,0 +1,186 @@
+{
+  "name": "kubernetes_troubleshooting_failed_persistent_volume_claims",
+  "description": "This incident type involves issues with persistent volume claims in a Kubernetes cluster. This could be due to storage problems or other configuration issues. It is important to resolve these issues promptly to ensure that the Kubernetes cluster is functioning properly.",
+  "params": [
+    {
+      "name": "VOLUME_SIZE",
+      "value": ""
+    },
+    {
+      "name": "PERSISTENT_VOLUME_CLAIM_NAME",
+      "value": ""
+    },
+    {
+      "name": "POD_NAME",
+      "value": ""
+    },
+    {
+      "name": "NODE_NAME",
+      "value": ""
+    },
+    {
+      "name": "STORAGE_CLASS_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Kubernetes - Troubleshooting Failed Persistent Volume Claims\nThis incident type involves issues with persistent volume claims in a Kubernetes cluster. This could be due to storage problems or other configuration issues. It is important to resolve these issues promptly to ensure that the Kubernetes cluster is functioning properly."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of the persistent volume claims"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl get pvc`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of persistent volumes"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl get pv`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if there are any failed pods in the cluster"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl get pods --field-selector=status.phase=Failed`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the events for the namespace where the incident occurred"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl get events -n ${NAMESPACE_NAME}`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Describe the pod that is having issues with persistent volume claims"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl describe pod ${POD_NAME}`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the logs of the pod"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl logs ${POD_NAME}`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the storage class and volume configurations"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_get_storageclass_describe_storageclass($STORAGE_CLASS_NAME)"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the state of the nodes in the cluster"
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_kubectl_nodes_info($NODE_NAME)"
+    },
+    {
+      "name": "cell_18",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Misconfigured storage classes, which can cause volumes to fail to mount properly."
+    },
+    {
+      "name": "cell_19",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_check_storage_class_mount_options($NAMESPACE_NAME)"
+    },
+    {
+      "name": "cell_20",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Insufficient storage capacity in the cluster leading to failed persistent volume claims."
+    },
+    {
+      "name": "cell_21",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_script_check_capacity_and_pvc_status($VOLUME_SIZE, $STORAGE_CLASS_NAME, $NAMESPACE_NAME)"
+    },
+    {
+      "name": "cell_22",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the storage configuration of the Kubernetes cluster to ensure that it is properly configured."
+    },
+    {
+      "name": "cell_23",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_storageconfig_check($STORAGE_CLASS_NAME)"
+    },
+    {
+      "name": "cell_24",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the persistent volume claims to ensure that they are correctly configured and that the storage class is available."
+    },
+    {
+      "name": "cell_25",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_kubectl_check_pvc_and_sc($PERSISTENT_VOLUME_CLAIM_NAME, $STORAGE_CLASS_NAME)"
+    }
+  ]
+}
